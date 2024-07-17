@@ -1,6 +1,7 @@
-import { IsArray, IsOptional, IsInt, IsNotEmpty, IsNumber, IsPositive, Matches, Max, MaxLength, Min, MinLength, Validate } from 'class-validator';
+import { IsOptional, IsInt, IsNotEmpty, IsNumber, IsPositive, Matches, Max, MaxLength, Min, MinLength, IsIn } from 'class-validator';
 
-import { DifficultyType, ImageValidator, IsPriceDiscountValid } from '../validator/validator';
+import { IsPriceDiscountValid } from '../validator/validator';
+import { DifficultyType } from '../interface/ToursInterface';
 
 class TourDTO {
   @MinLength(5)
@@ -32,6 +33,7 @@ class TourDTO {
   maxGroupSize!: number;
 
   @IsNotEmpty()
+  @IsIn(['easy', 'medium', 'difficult'])
   difficulty!: DifficultyType;
 
   @IsPositive()
@@ -59,16 +61,8 @@ class TourDTO {
 
   @MinLength(20)
   @IsOptional()
-  @Matches(/^[A-Za-z0-9\s]+$/, { message: 'Description contains only letters and number' })
+  // @Matches(/^[A-Za-z0-9\s]+$/, { message: 'Description contains only letters and number' })
   description!: string | null;
-
-  @IsNotEmpty()
-  @Matches(/\.(jpg|jpeg|png|gif)$/i, { message: 'Image Cover must be an image string' })
-  imageCover!: string;
-
-  @IsArray()
-  @Validate(ImageValidator)
-  images!: string[] | null;
 }
 
 export default TourDTO;

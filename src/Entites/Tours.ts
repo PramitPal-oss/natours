@@ -1,7 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { IsNumber, IsPositive, IsInt, MinLength, MaxLength, Matches, Min, Max, IsArray, IsNotEmpty, IsDateString, Validate } from 'class-validator';
-import { DifficultyType, ImageValidator, IsPriceDiscountValid } from '../validator/validator';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, UpdateDateColumn, CreateDateColumn } from 'typeorm';
+import { IsNumber, IsPositive, IsInt, MinLength, MaxLength, Matches, Min, Max, IsNotEmpty } from 'class-validator';
+import { IsPriceDiscountValid } from '../validator/validator';
 import Dates from './Date';
+import Images from './Image';
+import { DifficultyType } from '../interface/ToursInterface';
 
 @Entity()
 class Tours {
@@ -117,31 +119,23 @@ class Tours {
   @Matches(/^[A-Za-z0-9\s]+$/, { message: 'Description contains only letters and number' })
   description!: string | null;
 
-  @Column({
-    type: 'varchar',
-    length: 50,
-    nullable: false,
-  })
-  @IsNotEmpty()
-  @Matches(/\.(jpg|jpeg|png|gif)$/i, { message: 'Image Cover must be an image string' })
-  imageCover!: string;
-
-  @Column({
-    type: 'simple-array',
-    nullable: true,
-  })
-  @Validate(ImageValidator)
-  @IsArray()
-  images!: string[] | null;
-
-  @Column({
+  @CreateDateColumn({
     type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
+    // default: () => 'CURRENT_TIMESTAMP',
+    update: false,
   })
-  @IsDateString()
   created_at!: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamp',
+    // default: () => 'CURRENT_TIMESTAMP',
+  })
+  updated_at!: Date;
 
   @OneToMany(() => Dates, (date: Dates) => date.tour, { cascade: true })
   Dates!: Dates[];
+
+  @OneToMany(() => Images, (image: Images) => image.tour, { cascade: true })
+  Images!: Images[];
 }
 export default Tours;

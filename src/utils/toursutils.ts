@@ -1,19 +1,8 @@
 import { FindOperator, FindOptionsOrder, FindOptionsSelect, FindOptionsWhere, LessThan, MoreThan } from 'typeorm';
 import { Request } from 'express';
+import { ValidationError } from 'class-validator';
 import Tours from '../Entites/Tours';
-import { DifficultyType } from '../validator/validator';
-
-interface QueryParams {
-  duration?: string | string[];
-  difficulty?: string | string[];
-  price?: string | string[];
-}
-
-interface QueryObject {
-  duration?: number | FindOperator<number> | undefined;
-  difficulty?: string;
-  price?: number | FindOperator<number> | undefined;
-}
+import { DifficultyType, ErrorInterface, QueryObject, QueryParams } from '../interface/ToursInterface';
 
 const objectHandler = (value: string | object | undefined): FindOperator<number> | undefined | number => {
   if (typeof value === 'object') {
@@ -67,4 +56,23 @@ const createFieldsObj = (req: Request): FindOptionsSelect<Tours> | undefined => 
   return undefined;
 };
 
-export { createFieldsObj, createOrderObj, createWherObject };
+const extractErrors = (errors: ValidationError[]): ErrorInterface[] | [] => {
+  const result: ErrorInterface[] = [];
+
+  const traverse = (error: ValidationError): void => {
+    if (error.constraints) {
+      result.push({
+        property: error.property,
+        constraints: error.constraints,
+      });
+    }
+    if (error.children) {
+      error.children.forEach((child: ValidationError) => traverse(child));
+    }
+  };
+
+  errors.forEach((error: ValidationError) => traverse(error));
+  return result;
+};
+
+export { createFieldsObj, createOrderObj, createWherObject, extractErrors };

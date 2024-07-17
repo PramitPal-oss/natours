@@ -1,11 +1,8 @@
-// StartDateDTO.ts
-import { IsNotEmpty, Validate } from 'class-validator';
-import { DateValidator } from '../validator/validator';
+import { IsDateString, IsNotEmpty } from 'class-validator';
 
 class DatesDTO {
   @IsNotEmpty()
-  @Validate(DateValidator)
-  //@IsDate({ message: 'Invalid date format. Date should be in the format "YYYY-MM-DD"' })
-  startDate!: string;
+  @IsDateString()
+  startDate!: Date;
 }
 export default DatesDTO;

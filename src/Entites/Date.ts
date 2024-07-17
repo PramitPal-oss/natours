@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import Tours from './Tours';
 
 @Entity()
@@ -11,6 +11,17 @@ class Dates {
     nullable: false,
   })
   startDate!: string;
+
+  @CreateDateColumn({
+    type: 'timestamp',
+    update: false,
+  })
+  created_at!: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamp',
+  })
+  updated_at!: Date;
 
   @ManyToOne(() => Tours, (tour: Tours) => tour.Dates, { onDelete: 'CASCADE' })
   tour!: Tours;
