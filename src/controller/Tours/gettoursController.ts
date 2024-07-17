@@ -28,10 +28,10 @@ const getAllTours = async (req: Request, res: Response): Promise<Response<any, R
       },
     });
   } catch (error: any) {
-    console.log(error);
     return res.status(400).json({
       status: 'failed',
       message: error.message,
+      data: [],
     });
   }
 };
@@ -60,6 +60,7 @@ const topFiveCheapTours = async (req: Request, res: Response): Promise<Response<
     return res.status(400).json({
       status: 'failed',
       message: error.message,
+      data: [],
     });
   }
 };
@@ -92,8 +93,38 @@ const tourStats = async (req: Request, res: Response): Promise<Response<any, Rec
     return res.status(400).json({
       status: 'failed',
       message: error.message,
+      data: [],
     });
   }
 };
 
-export { getAllTours, topFiveCheapTours, tourStats };
+const getToursByID = async (req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined> => {
+  try {
+    const { id }: string | any = req.params;
+    if (!id) throw new Error('No Id provided');
+    if (Number.isNaN(+id)) throw new Error('Invalid ID');
+    const tours: Tours[] = await AppdataSource.getRepository(Tours).find({
+      where: {
+        id: +id,
+      },
+      relations: {
+        Images: true,
+        Dates: true,
+      },
+    });
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        tours,
+      },
+    });
+  } catch (error: any) {
+    return res.status(400).json({
+      status: 'failed',
+      message: error.message,
+      data: [],
+    });
+  }
+};
+
+export { getAllTours, topFiveCheapTours, tourStats, getToursByID };

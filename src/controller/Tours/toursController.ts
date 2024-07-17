@@ -11,7 +11,7 @@ import DatesDTO from '../../DTO/DatesDTO';
 import ImageDTO from '../../DTO/ImageDTO';
 import { extractErrors } from '../../utils/toursutils';
 
-const CreateTours = async (req: Request, res: Response): Promise<Response<any, Record<string, any>>> => {
+const createTours = async (req: Request, res: Response): Promise<Response<any, Record<string, any>>> => {
   try {
     const infoDTO: InfoDTO = plainToInstance(InfoDTO, req.body);
 
@@ -49,10 +49,25 @@ const CreateTours = async (req: Request, res: Response): Promise<Response<any, R
       );
     });
 
-    return res.status(201).json({ status: 'success', statusCode: 400, message: 'Tour and StartDates created successfully' });
+    return res.status(201).json({ status: 'success', statusCode: 400, message: 'Tour created successfully' });
   } catch (error: any) {
     return res.status(400).json({ status: 'failed', statusCode: 400, message: error.message });
   }
 };
 
-export default CreateTours;
+const updateTours = async (req: Request, res: Response): Promise<Response<any, Record<string, any>>> => {
+  try {
+    const { id }: string | any = req.params;
+    const user: Tours | null = await AppdataSource.getRepository(Tours).findOneBy({
+      id: id,
+    });
+    if (!user) throw new Error('dww');
+    AppdataSource.getRepository(Tours).merge(user, req.body);
+    await AppdataSource.getRepository(Tours).save(user);
+    return res.status(201).json({ status: 'success', statusCode: 400, message: 'Tour created successfully' });
+  } catch (error: any) {
+    return res.status(400).json({ status: 'failed', statusCode: 400, message: error.message });
+  }
+};
+
+export { createTours, updateTours };

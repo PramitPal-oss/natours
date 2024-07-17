@@ -1,13 +1,15 @@
-import express, { Express, Request, Response } from 'express';
+import express, { Express, NextFunction, Request, Response } from 'express';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import helmet from 'helmet';
 import AppdataSource from './database';
-import { getAllTours, topFiveCheapTours, tourStats } from './controller/Tours/gettoursController';
-import CreateTours from './controller/Tours/toursController';
+import tourRouter from './routes/toursRoute';
 
 dotenv.config({ path: './.env' });
 
 const app: Express = express();
+
+app.use(helmet());
 
 app.use(express.json());
 
@@ -25,13 +27,14 @@ app.get('/', (_req: Request, res: Response) => {
   res.send('Hellow From Server');
 });
 
-app.get('/api/v1/tours', getAllTours);
+app.use('/api/v1/tours', tourRouter);
 
-app.get('/api/v1/top-5-cheap', topFiveCheapTours);
-
-app.get('/api/v1/tours-stats', tourStats);
-
-app.post('/api/v1/tours', CreateTours);
+app.all('*', (req: Request, res: Response, next: NextFunction) => {
+  return res.status(400).json({
+    status: false,
+    message: `${req.url} is not exists`,
+  });
+});
 
 const PORT: number = Number(process.env.LOCALHOST_PORT) || 8000;
 
