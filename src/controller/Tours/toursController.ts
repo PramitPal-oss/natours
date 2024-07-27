@@ -66,8 +66,13 @@ const updateTours = async (req: Request, res: Response): Promise<Response<any, R
 
   try {
     await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    const tourRepository: Repository<Tours> = queryRunner.manager.getRepository(Tours);
+    const imageRepository: Repository<Images> = queryRunner.manager.getRepository(Images);
+    const dateRepository: Repository<Dates> = queryRunner.manager.getRepository(Dates);
+
     const { id }: string | any = req.params;
-    console.log(id);
 
     const infoDTO: InfoDTO = plainToInstance(InfoDTO, req.body);
 
@@ -90,11 +95,36 @@ const updateTours = async (req: Request, res: Response): Promise<Response<any, R
       throw new Error('No tours found in this ID');
     }
 
-    console.log(tours);
+    await tourRepository.update(id, infoDTO.tour);
 
-    return res.status(201).json({ status: 'success', statusCode: 400, message: 'Tour created successfully' });
+    await Promise.all(
+      infoDTO.dates.map(async (startDateDTO: DatesDTO) => {
+        if (startDateDTO.id) {
+          await dateRepository.update(startDateDTO.id, startDateDTO);
+        } else {
+          const startDate: Dates = dateRepository.create({ startDate: startDateDTO.startDate, tour: tours });
+          await dateRepository.save(startDate);
+        }
+      })
+    );
+
+    await Promise.all(
+      infoDTO.images.map(async (image: ImageDTO) => {
+        if (image.id) {
+          await imageRepository.update(1, { imageCover: image.imageCover, images: JSON.stringify(image.images) });
+        } else {
+          const imageRepo: Images = imageRepository.create({ imageCover: image.imageCover, images: JSON.stringify(image.images), tour: tours });
+          await imageRepository.save(imageRepo);
+        }
+      })
+    );
+    await queryRunner.commitTransaction();
+    return res.status(201).json({ status: 'success', statusCode: 400, message: 'Tour Updated successfully' });
   } catch (error: any) {
+    await queryRunner.rollbackTransaction();
     return res.status(400).json({ status: 'failed', statusCode: 400, message: error.message });
+  } finally {
+    await queryRunner.release();
   }
 };
 

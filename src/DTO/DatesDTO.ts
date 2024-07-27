@@ -1,6 +1,9 @@
-import { IsDateString, IsNotEmpty } from 'class-validator';
+import { IsDateString, IsNotEmpty, IsOptional } from 'class-validator';
 
 class DatesDTO {
+  @IsOptional()
+  id?: number;
+
   @IsNotEmpty()
   @IsDateString()
   startDate!: Date;

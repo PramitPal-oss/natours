@@ -1,6 +1,9 @@
 import { IsArray, IsNotEmpty, IsOptional, Matches } from 'class-validator';
 
 class ImageDTO {
+  @IsOptional()
+  id?: number;
+
   @IsNotEmpty()
   @Matches(/\.(jpg|jpeg|png|gif)$/i, { message: 'Image Cover must be an image string' })
   imageCover!: string;
