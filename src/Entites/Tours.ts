@@ -121,14 +121,14 @@ class Tours {
 
   @CreateDateColumn({
     type: 'timestamp',
-    // default: () => 'CURRENT_TIMESTAMP',
     update: false,
   })
   created_at!: Date;
 
   @UpdateDateColumn({
     type: 'timestamp',
-    // default: () => 'CURRENT_TIMESTAMP',
+    update: true,
+    nullable: true,
   })
   updated_at!: Date;
 

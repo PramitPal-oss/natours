@@ -10,7 +10,7 @@ class Dates {
     type: 'date',
     nullable: false,
   })
-  startDate!: string;
+  startDate!: Date;
 
   @CreateDateColumn({
     type: 'timestamp',
