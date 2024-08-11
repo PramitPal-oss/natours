@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import Tours from './Entites/Tours';
 import Dates from './Entites/Date';
 import Images from './Entites/Image';
+import User from './Entites/User';
 
 dotenv.config({ path: './.env' });
 
@@ -13,9 +14,9 @@ const AppdataSource: DataSource = new DataSource({
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,
   database: 'natours',
-  //logging: true,
+  logging: true,
   synchronize: true,
-  entities: [Tours, Dates, Images],
+  entities: [Tours, Dates, Images, User],
 });
 
 export default AppdataSource;

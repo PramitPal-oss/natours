@@ -3,7 +3,7 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
 import AppdataSource from './database';
-import tourRouter from './routes/toursRoute';
+import { UserRouter, tourRouter } from './routes/toursRoute';
 
 dotenv.config({ path: './.env' });
 
@@ -28,6 +28,7 @@ app.get('/', (_req: Request, res: Response) => {
 });
 
 app.use('/api/v1/tours', tourRouter);
+app.use('/api/v1/users', UserRouter);
 
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
   return res.status(400).json({

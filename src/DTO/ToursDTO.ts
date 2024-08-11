@@ -8,7 +8,7 @@ class TourDTO {
   @MaxLength(40)
   @IsNotEmpty()
   @Matches(/^[A-Za-z0-9\s]+$/, { message: 'name contains only letters and number' })
-  name!: string;
+  TOUR_NAME!: string;
 
   @IsNumber()
   @IsPositive()

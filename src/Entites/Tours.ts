@@ -15,12 +15,13 @@ class Tours {
     length: 50,
     nullable: false,
     unique: true,
+    name: 'name',
   })
   @MinLength(5)
   @MaxLength(40)
   @IsNotEmpty()
   @Matches(/^[A-Za-z0-9\s]+$/, { message: 'name contains only letters and number' })
-  name!: string;
+  TOUR_NAME!: string;
 
   @Column('decimal', {
     precision: 2,

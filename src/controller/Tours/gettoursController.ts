@@ -43,7 +43,7 @@ const topFiveCheapTours = async (req: Request, res: Response): Promise<Response<
         price: 'ASC',
       },
       take: 5,
-      select: ['name', 'price', 'ratingsAverage', 'summary', 'difficulty', 'ratingsAverage', 'id'],
+      select: ['TOUR_NAME', 'price', 'ratingsAverage', 'summary', 'difficulty', 'ratingsAverage', 'id'],
       relations: {
         Dates: true,
         Images: true,
