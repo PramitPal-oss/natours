@@ -68,7 +68,7 @@ class User {
 
   @BeforeInsert()
   async encrypctPassword(): Promise<string> {
-    this.password = await bcrypt.hash(this.password, 15);
+    this.password = await bcrypt.hash(this.password, 12);
     return this.password;
   }
 

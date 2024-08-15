@@ -1,3 +1,4 @@
+import { NextFunction, Request, Response } from 'express';
 import { FindOperator } from 'typeorm';
 
 export interface QueryParams {
@@ -16,5 +17,12 @@ export interface ErrorInterface {
   property: string;
   constraints: { [type: string]: string } | undefined;
 }
+
+export interface CustomError extends Error {
+  statusCode?: number;
+  status?: string;
+}
+
+export type catchAsyncInterface = (req: Request, res: Response, next: NextFunction) => Promise<any> | void;
 
 export type DifficultyType = 'easy' | 'medium' | 'difficult';

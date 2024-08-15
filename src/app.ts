@@ -3,7 +3,9 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
 import AppdataSource from './database';
-import { UserRouter, tourRouter } from './routes/toursRoute';
+import UserRouter from './routes/UserRoute';
+import tourRouter from './routes/toursRoute';
+import AppError, { globalErrorHandler } from './utils/appError';
 
 dotenv.config({ path: './.env' });
 
@@ -23,24 +25,20 @@ AppdataSource.initialize()
     console.log('Error during Data Source initialization', err.message);
   });
 
-app.get('/', (_req: Request, res: Response) => {
-  res.send('Hellow From Server');
-});
-
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', UserRouter);
 
+// Error Handler for wrong Route
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
-  return res.status(400).json({
-    status: false,
-    message: `${req.url} is not exists`,
-  });
+  next(new AppError(`can't find ${req.originalUrl} on this server!`, 404));
 });
 
-const PORT: number = Number(process.env.LOCALHOST_PORT) || 8000;
+app.use(globalErrorHandler);
+
+const PORT: number = Number(process.env.LOCALHOST_PORT!);
 
 app.listen(PORT, () => {
-  console.log('server is running adn Database is connected');
+  console.log(`server is running at port http://127.0.0.1:${process.env.LOCALHOST_PORT!} 🟢`);
 });
 
 export default app;

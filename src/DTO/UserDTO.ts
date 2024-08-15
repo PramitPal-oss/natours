@@ -19,7 +19,6 @@ class UserDTO {
   EMAIL!: string;
 
   @MinLength(8, { groups: ['create', 'login'] })
-  @MaxLength(10, { groups: ['create', 'login'] })
   @IsNotEmpty()
   @Matches(/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, {
     message: 'Password must contains  number , special chracter, letter, one capitalLetter and must be more than or equal to 8 character',

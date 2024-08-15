@@ -1,108 +1,85 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import Tours from '../../Entites/Tours';
 import AppdataSource from '../../database';
 import { createFieldsObj, createOrderObj, createWherObject } from '../../utils/toursutils';
+import AppError, { catchAsync } from '../../utils/appError';
+import { catchAsyncInterface } from '../../interface/ToursInterface';
 
-const getAllTours = async (req: Request, res: Response): Promise<Response<any, Record<string, any>>> => {
-  try {
-    const ToursRepo: Repository<Tours> = AppdataSource.getRepository(Tours);
+const getAllTours: catchAsyncInterface = catchAsync(async (req: Request, res: Response): Promise<Response<any, Record<string, any>>> => {
+  const ToursRepo: Repository<Tours> = AppdataSource.getRepository(Tours);
 
-    const tours: Tours[] = await ToursRepo.find({
-      where: createWherObject(req),
-      order: createOrderObj(req),
-      select: createFieldsObj(req),
-      take: 3,
-      skip: req?.query?.page ? (+req.query.page - 1) * 3 : 0,
-      relations: {
-        Dates: createFieldsObj(req) ? Object.keys(createFieldsObj(req)!).includes('Dates') : false,
-        Images: createFieldsObj(req) ? Object.keys(createFieldsObj(req)!).includes('Images') : false,
-      },
-    });
+  const tours: Tours[] = await ToursRepo.find({
+    where: createWherObject(req),
+    order: createOrderObj(req),
+    select: createFieldsObj(req),
+    take: 3,
+    skip: req?.query?.page ? (+req.query.page - 1) * 3 : 0,
+    relations: {
+      Dates: createFieldsObj(req) ? Object.keys(createFieldsObj(req)!).includes('Dates') : false,
+      Images: createFieldsObj(req) ? Object.keys(createFieldsObj(req)!).includes('Images') : false,
+    },
+  });
 
-    return res.status(200).json({
-      status: 'success',
-      results: tours.length,
-      data: {
-        tours,
-      },
-    });
-  } catch (error: any) {
-    return res.status(400).json({
-      status: 'failed',
-      message: error.message,
-      data: [],
-    });
-  }
-};
+  return res.status(200).json({
+    status: 'success',
+    results: tours.length,
+    data: {
+      tours,
+    },
+  });
+});
 
-const topFiveCheapTours = async (req: Request, res: Response): Promise<Response<any, Record<string, any>>> => {
-  try {
-    const cheapTours: Tours[] = await AppdataSource.getRepository(Tours).find({
-      order: {
-        price: 'ASC',
-      },
-      take: 5,
-      select: ['TOUR_NAME', 'price', 'ratingsAverage', 'summary', 'difficulty', 'ratingsAverage', 'id'],
-      relations: {
-        Dates: true,
-        Images: true,
-      },
-    });
-    return res.status(400).json({
-      status: 'success',
-      results: cheapTours.length,
-      data: {
-        cheapTours,
-      },
-    });
-  } catch (error: any) {
-    return res.status(400).json({
-      status: 'failed',
-      message: error.message,
-      data: [],
-    });
-  }
-};
+const topFiveCheapTours: catchAsyncInterface = catchAsync(async (req: Request, res: Response): Promise<Response<any, Record<string, any>>> => {
+  const cheapTours: Tours[] = await AppdataSource.getRepository(Tours).find({
+    order: {
+      price: 'ASC',
+    },
+    take: 5,
+    select: ['TOUR_NAME', 'price', 'ratingsAverage', 'summary', 'difficulty', 'ratingsAverage', 'id'],
+    relations: {
+      Dates: true,
+      Images: true,
+    },
+  });
+  return res.status(400).json({
+    status: 'success',
+    results: cheapTours.length,
+    data: {
+      cheapTours,
+    },
+  });
+});
 
-const tourStats = async (req: Request, res: Response): Promise<Response<any, Record<string, any>>> => {
-  try {
-    const tourQuery: SelectQueryBuilder<Tours> = AppdataSource.createQueryBuilder()
-      .select('difficulty')
-      .addSelect('SUM(price)', 'TOTAL_PRICE')
-      .addSelect('AVG(price)', 'AVG_PRICE')
-      .addSelect('MAX(price)', 'MAX_PRICE')
-      .addSelect('MIN(price)', 'MIN_PRICE')
-      .addSelect('COUNT(*)', 'NUM_TOURS')
-      .addSelect('SUM(ratingsQuantity)', 'NUM_RATINGS')
-      .addSelect('AVG(ratingsAverage)', 'AVG_RATINGS')
-      .from(Tours, 'tour')
-      .groupBy('difficulty')
-      .orderBy('AVG_PRICE');
+const tourStats: catchAsyncInterface = catchAsync(async (req: Request, res: Response): Promise<Response<any, Record<string, any>>> => {
+  const tourQuery: SelectQueryBuilder<Tours> = AppdataSource.createQueryBuilder()
+    .select('difficulty')
+    .addSelect('SUM(price)', 'TOTAL_PRICE')
+    .addSelect('AVG(price)', 'AVG_PRICE')
+    .addSelect('MAX(price)', 'MAX_PRICE')
+    .addSelect('MIN(price)', 'MIN_PRICE')
+    .addSelect('COUNT(*)', 'NUM_TOURS')
+    .addSelect('SUM(ratingsQuantity)', 'NUM_RATINGS')
+    .addSelect('AVG(ratingsAverage)', 'AVG_RATINGS')
+    .from(Tours, 'tour')
+    .groupBy('difficulty')
+    .orderBy('AVG_PRICE');
 
-    const results: any[] = await tourQuery.getRawMany();
+  const results: any[] = await tourQuery.getRawMany();
 
-    return res.status(200).json({
-      status: 'success',
-      results: results.length,
-      data: {
-        results,
-      },
-    });
-  } catch (error: any) {
-    return res.status(400).json({
-      status: 'failed',
-      message: error.message,
-      data: [],
-    });
-  }
-};
+  return res.status(200).json({
+    status: 'success',
+    results: results.length,
+    data: {
+      results,
+    },
+  });
+});
 
-const getToursByID = async (req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined> => {
-  try {
+const getToursByID: catchAsyncInterface = catchAsync(
+  async (req: Request, res: Response, next: NextFunction): Promise<Response<any, Record<string, any>> | undefined> => {
     const { id }: string | any = req.params;
-    if (!id) throw new Error('No Id provided');
-    if (Number.isNaN(+id)) throw new Error('Invalid ID');
+    if (!id || Number.isNaN(+id)) next(new AppError(`Invalid ID`, 404));
     const tours: Tours[] = await AppdataSource.getRepository(Tours).find({
       where: {
         id: +id,
@@ -118,13 +95,7 @@ const getToursByID = async (req: Request, res: Response): Promise<Response<any, 
         tours,
       },
     });
-  } catch (error: any) {
-    return res.status(400).json({
-      status: 'failed',
-      message: error.message,
-      data: [],
-    });
   }
-};
+);
 
 export { getAllTours, topFiveCheapTours, tourStats, getToursByID };

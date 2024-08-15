@@ -1,6 +1,7 @@
 import { FindOperator, FindOptionsOrder, FindOptionsSelect, FindOptionsWhere, LessThan, MoreThan } from 'typeorm';
 import { Request } from 'express';
 import { ValidationError } from 'class-validator';
+import jwt from 'jsonwebtoken';
 import Tours from '../Entites/Tours';
 import { DifficultyType, ErrorInterface, QueryObject, QueryParams } from '../interface/ToursInterface';
 
@@ -75,4 +76,11 @@ const extractErrors = (errors: ValidationError[]): ErrorInterface[] | [] => {
   return result;
 };
 
-export { createFieldsObj, createOrderObj, createWherObject, extractErrors };
+const STATUS: { success: 'SUCCESS'; failed: 'FAILED' } = { success: 'SUCCESS', failed: 'FAILED' };
+
+const token = (id: number): string =>
+  jwt.sign({ id }, process.env.JWT_SECREAT!, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
+
+export { createFieldsObj, createOrderObj, createWherObject, extractErrors, STATUS, token };

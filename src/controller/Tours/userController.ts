@@ -1,11 +1,12 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { plainToInstance } from 'class-transformer';
 import { validate, ValidationError } from 'class-validator';
 import { Repository } from 'typeorm';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import { promisify } from 'util';
 import UserDTO from '../../DTO/UserDTO';
-import { extractErrors } from '../../utils/toursutils';
+import { extractErrors, STATUS } from '../../utils/toursutils';
 import AppdataSource from '../../database';
 import User from '../../Entites/User';
 
@@ -35,8 +36,8 @@ const createUser = async (req: Request, res: Response): Promise<Response<any, Re
 
     const newUser: User = await UserRepo.save(createUserReq);
 
-    const token: string = jwt.sign({ id: +newUser.id }, process.env.JWT_SECREAT || 'Secreat', {
-      expiresIn: process.env.JWT_EXPIRES_IN || '90d',
+    const token: string = jwt.sign({ id: +newUser.id }, process.env.JWT_SECREAT!, {
+      expiresIn: process.env.JWT_EXPIRES_IN,
     });
 
     return res.status(400).json({ status: 'SUCCESS', statusCode: 400, message: 'user created successfully', token });
@@ -69,14 +70,31 @@ const login = async (req: Request, res: Response): Promise<Response<any, Record<
 
     if (!findPassword) throw new Error('InValid Email or Password');
 
-    const token: string = jwt.sign({ id: +findUser.id }, process.env.JWT_SECREAT || 'Secreat', {
-      expiresIn: process.env.JWT_EXPIRES_IN || '90d',
+    const token: string = jwt.sign({ id: +findUser.id }, process.env.JWT_SECREAT!, {
+      expiresIn: process.env.JWT_EXPIRES_IN,
     });
 
     return res.status(200).json({ status: 'SUCCESS', statusCode: 200, message: 'user has successfully', token });
   } catch (error: any) {
-    return res.status(400).json({ status: 'failed', statusCode: 400, message: error.message });
+    return res.status(400).json({ status: STATUS.success, statusCode: 400, message: error.message });
   }
 };
 
-export { createUser, login };
+const protect = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  try {
+    let token: string = '';
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+    if (!token) {
+      return res.status(400).json({ status: 'failed', statusCode: 200, message: 'No Token Found' });
+    }
+    const decoded: void = await promisify<string, string>(jwt.verify)(token, process.env.JWT_SECREAT!);
+    console.log(decoded, ': jwt.SigningKeyCallback');
+    next();
+  } catch (error: any) {
+    return res.status(400).json({ status: 'failed', statusCode: 401, message: error.message });
+  }
+};
+
+export { createUser, login, protect };

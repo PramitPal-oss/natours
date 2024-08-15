@@ -14,7 +14,7 @@ const AppdataSource: DataSource = new DataSource({
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,
   database: 'natours',
-  logging: true,
+  // logging: true,
   synchronize: true,
   entities: [Tours, Dates, Images, User],
 });
