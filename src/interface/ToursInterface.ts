@@ -21,6 +21,7 @@ export interface ErrorInterface {
 export interface CustomError extends Error {
   statusCode?: number;
   status?: string;
+  errors?: ErrorInterface[] | [];
 }
 
 export type catchAsyncInterface = (req: Request, res: Response, next: NextFunction) => Promise<any> | void;

@@ -1,25 +1,27 @@
 import { NextFunction, Request, Response } from 'express';
-import { CustomError } from '../interface/ToursInterface';
-import { STATUS } from './toursutils';
+import { CustomError, ErrorInterface } from '../interface/ToursInterface';
+import { STATUS } from './helper';
 
 export const globalErrorHandler = (err: CustomError, req: Request, res: Response, next: NextFunction): void => {
-  err.statusCode = err.statusCode || 500;
-  err.status = err.status || 'error';
-  res.status(err.statusCode).json({
-    status: err.status,
+  res.status(err.statusCode || 500).json({
+    status: err.status || STATUS.failed,
     message: err.message,
+    errors: err.errors || [],
   });
 };
 
 class AppError extends Error {
   statusCode: number;
 
+  errors?: ErrorInterface[] | [];
+
   status: string;
 
-  constructor(message: string, statusCode: number) {
+  constructor(message: string, statusCode: number, errors?: ErrorInterface[] | []) {
     super(message);
     this.statusCode = statusCode;
     this.status = `${statusCode}`.startsWith('4') ? STATUS.failed : STATUS.success;
+    this.errors = errors;
   }
 }
 

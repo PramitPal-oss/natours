@@ -1,9 +1,7 @@
 import { FindOperator, FindOptionsOrder, FindOptionsSelect, FindOptionsWhere, LessThan, MoreThan } from 'typeorm';
 import { Request } from 'express';
-import { ValidationError } from 'class-validator';
-import jwt from 'jsonwebtoken';
 import Tours from '../Entites/Tours';
-import { DifficultyType, ErrorInterface, QueryObject, QueryParams } from '../interface/ToursInterface';
+import { DifficultyType, QueryObject, QueryParams } from '../interface/ToursInterface';
 
 const objectHandler = (value: string | object | undefined): FindOperator<number> | undefined | number => {
   if (typeof value === 'object') {
@@ -33,8 +31,11 @@ const createWherObject = (req: Request): FindOptionsWhere<Tours> | FindOptionsWh
 
 const createOrderObj = (req: Request): FindOptionsOrder<Tours> | undefined => {
   const { sort }: string | string[] | any = req.query;
+
   let obj: { [key: string]: string } = {};
+
   const sorrteddata: string[] = sort?.split(',');
+
   sorrteddata?.forEach((el: string) => {
     const splitEl: string[] = el.split('-');
     const property: string = splitEl[1];
@@ -57,30 +58,4 @@ const createFieldsObj = (req: Request): FindOptionsSelect<Tours> | undefined => 
   return undefined;
 };
 
-const extractErrors = (errors: ValidationError[]): ErrorInterface[] | [] => {
-  const result: ErrorInterface[] = [];
-
-  const traverse = (error: ValidationError): void => {
-    if (error.constraints) {
-      result.push({
-        property: error.property,
-        constraints: error.constraints,
-      });
-    }
-    if (error.children) {
-      error.children.forEach((child: ValidationError) => traverse(child));
-    }
-  };
-
-  errors.forEach((error: ValidationError) => traverse(error));
-  return result;
-};
-
-const STATUS: { success: 'SUCCESS'; failed: 'FAILED' } = { success: 'SUCCESS', failed: 'FAILED' };
-
-const token = (id: number): string =>
-  jwt.sign({ id }, process.env.JWT_SECREAT!, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  });
-
-export { createFieldsObj, createOrderObj, createWherObject, extractErrors, STATUS, token };
+export { createFieldsObj, createOrderObj, createWherObject };

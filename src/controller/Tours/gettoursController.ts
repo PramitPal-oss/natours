@@ -5,15 +5,16 @@ import AppdataSource from '../../database';
 import { createFieldsObj, createOrderObj, createWherObject } from '../../utils/toursutils';
 import AppError, { catchAsync } from '../../utils/appError';
 import { catchAsyncInterface } from '../../interface/ToursInterface';
+import { constructResponse } from '../../utils/helper';
 
-const getAllTours: catchAsyncInterface = catchAsync(async (req: Request, res: Response): Promise<Response<any, Record<string, any>>> => {
+const getAllTours: catchAsyncInterface = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const ToursRepo: Repository<Tours> = AppdataSource.getRepository(Tours);
 
   const tours: Tours[] = await ToursRepo.find({
     where: createWherObject(req),
     order: createOrderObj(req),
     select: createFieldsObj(req),
-    take: 3,
+    take: req?.query?.take && !Number.isNaN(+req.query.take) ? +req.query.take : 3,
     skip: req?.query?.page ? (+req.query.page - 1) * 3 : 0,
     relations: {
       Dates: createFieldsObj(req) ? Object.keys(createFieldsObj(req)!).includes('Dates') : false,
@@ -21,13 +22,7 @@ const getAllTours: catchAsyncInterface = catchAsync(async (req: Request, res: Re
     },
   });
 
-  return res.status(200).json({
-    status: 'success',
-    results: tours.length,
-    data: {
-      tours,
-    },
-  });
+  return constructResponse(res, 'Tours successfully found!', 'allTours', tours);
 });
 
 const topFiveCheapTours: catchAsyncInterface = catchAsync(async (req: Request, res: Response): Promise<Response<any, Record<string, any>>> => {
@@ -42,13 +37,7 @@ const topFiveCheapTours: catchAsyncInterface = catchAsync(async (req: Request, r
       Images: true,
     },
   });
-  return res.status(400).json({
-    status: 'success',
-    results: cheapTours.length,
-    data: {
-      cheapTours,
-    },
-  });
+  return constructResponse(res, 'Tours successfully found!', 'cheapTours', cheapTours);
 });
 
 const tourStats: catchAsyncInterface = catchAsync(async (req: Request, res: Response): Promise<Response<any, Record<string, any>>> => {
@@ -66,20 +55,15 @@ const tourStats: catchAsyncInterface = catchAsync(async (req: Request, res: Resp
     .orderBy('AVG_PRICE');
 
   const results: any[] = await tourQuery.getRawMany();
-
-  return res.status(200).json({
-    status: 'success',
-    results: results.length,
-    data: {
-      results,
-    },
-  });
+  return constructResponse(res, 'Tours successfully found!', 'TourStats', results);
 });
 
 const getToursByID: catchAsyncInterface = catchAsync(
   async (req: Request, res: Response, next: NextFunction): Promise<Response<any, Record<string, any>> | undefined> => {
     const { id }: string | any = req.params;
+
     if (!id || Number.isNaN(+id)) next(new AppError(`Invalid ID`, 404));
+
     const tours: Tours[] = await AppdataSource.getRepository(Tours).find({
       where: {
         id: +id,
@@ -89,12 +73,8 @@ const getToursByID: catchAsyncInterface = catchAsync(
         Dates: true,
       },
     });
-    return res.status(200).json({
-      status: 'success',
-      data: {
-        tours,
-      },
-    });
+
+    return constructResponse(res, 'Tours successfully found!', 'ToursByID', tours);
   }
 );
 

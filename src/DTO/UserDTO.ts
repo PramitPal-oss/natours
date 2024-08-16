@@ -1,8 +1,6 @@
-import { Entity } from 'typeorm';
 import { IsEmail, IsNotEmpty, Matches, MaxLength, MinLength } from 'class-validator';
 import { IsMatch } from '../validator/validator';
 
-@Entity()
 class UserDTO {
   @MaxLength(50, { groups: ['create'] })
   @IsNotEmpty({ groups: ['create'] })
