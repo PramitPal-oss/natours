@@ -1,10 +1,10 @@
 import express, { Router } from 'express';
 import { getAllTours, getToursByID, topFiveCheapTours, tourStats } from '../controller/Tours/gettoursController';
 import { createTours, updateTours } from '../controller/Tours/toursController';
-import { protect } from '../controller/Users/userController';
 import { validateDTO } from '../utils/helper';
 import QueryDTO from '../DTO/QueryDTO';
 import InfoDTO from '../DTO/InfoDTO';
+import { protect } from '../controller/Users/authController';
 
 const tourRouter: Router = express.Router();
 

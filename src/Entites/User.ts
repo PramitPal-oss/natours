@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BeforeInsert } from 'typeorm';
-import { IsEmail, IsNotEmpty, Matches, MaxLength, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, Matches, MaxLength, MinLength } from 'class-validator';
 import bcrypt from 'bcryptjs';
 
 @Entity()
@@ -65,6 +65,24 @@ class User {
   @IsNotEmpty()
   @Matches(/^[A-Za-z0-9\s]+$/, { message: 'ADDRESS contains only letters and number' })
   address!: string;
+
+  @Column({
+    type: 'text',
+    nullable: true,
+    name: 'PASSWORDRESET',
+  })
+  @MinLength(8)
+  @IsOptional()
+  PasswordReset!: string;
+
+  @Column({
+    type: 'text',
+    nullable: true,
+    name: 'PASSWORD_EXPAIRE_TIME',
+  })
+  @MinLength(8)
+  @IsOptional()
+  expairesIn!: number;
 
   @BeforeInsert()
   async encrypctPassword(): Promise<string> {

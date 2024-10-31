@@ -2,14 +2,6 @@ import { NextFunction, Request, Response } from 'express';
 import { CustomError, ErrorInterface } from '../interface/ToursInterface';
 import { STATUS } from './helper';
 
-export const globalErrorHandler = (err: CustomError, req: Request, res: Response, next: NextFunction): void => {
-  res.status(err.statusCode || 500).json({
-    status: err.status || STATUS.failed,
-    message: err.message,
-    errors: err.errors || [],
-  });
-};
-
 class AppError extends Error {
   statusCode: number;
 
@@ -24,6 +16,28 @@ class AppError extends Error {
     this.errors = errors;
   }
 }
+
+export const globalErrorHandler = (err: CustomError, req: Request, res: Response, next: NextFunction): void => {
+  if (err.name === 'JsonWebTokenError') {
+    res.status(err.statusCode || 500).json({
+      status: 401,
+      message: 'Invalid token. Please Log in again!',
+      errors: err.errors || [],
+    });
+  } else if (err.name === 'TokenExpiredError') {
+    res.status(err.statusCode || 500).json({
+      status: 401,
+      message: 'Yor token is expired! Please log in again.',
+      errors: err.errors || [],
+    });
+  } else {
+    res.status(err.statusCode || 500).json({
+      status: err.status || STATUS.failed,
+      message: err.message,
+      errors: err.errors || [],
+    });
+  }
+};
 
 export const catchAsync = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) => {
   return (req: Request, res: Response, next: NextFunction): Promise<any> | void => {

@@ -12,7 +12,7 @@ class UserDTO {
   @Matches(/^[A-Za-z0-9\s]+$/, { message: 'LAST_NAME contains only letters and number', groups: ['create'] })
   LAST_NAME!: string;
 
-  @IsNotEmpty({ groups: ['create', 'login'] })
+  @IsNotEmpty({ groups: ['create', 'login', 'reset'] })
   @IsEmail()
   EMAIL!: string;
 

@@ -4,6 +4,7 @@ import Tours from './Entites/Tours';
 import Dates from './Entites/Date';
 import Images from './Entites/Image';
 import User from './Entites/User';
+import { RepoInterface } from './interface/DatabaseInterface';
 
 dotenv.config({ path: './.env' });
 
@@ -18,5 +19,14 @@ const AppdataSource: DataSource = new DataSource({
   synchronize: true,
   entities: [Tours, Dates, Images, User],
 });
+
+export const REPOS: RepoInterface = {
+  USERREPO: AppdataSource.getRepository(User),
+  TOURREPO: AppdataSource.getRepository(Tours),
+  QUERYRUNNER: AppdataSource.createQueryRunner(),
+  TOURSQUERYREPO: AppdataSource.createQueryRunner().manager.getRepository(Tours),
+  IMAGEQUERYREPO: AppdataSource.createQueryRunner().manager.getRepository(Images),
+  DATEQUERYREPO: AppdataSource.createQueryRunner().manager.getRepository(Dates),
+};
 
 export default AppdataSource;

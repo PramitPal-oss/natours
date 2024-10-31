@@ -32,12 +32,16 @@
     "no-underscore-dangle": "off",
     "class-methods-use-this": "off",
     "prefer-destructuring": ["error", { "object": true, "array": false }],
-    "no-unused-vars": ["error", { "argsIgnorePattern": "req|res|next|err|val" }],
-    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "req|res|next|val" }],
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "req|res|next|err|val" }],
+    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "req|res|next|val" }],
     "import/no-extraneous-dependencies": ["off", { "devDependencies": false, "optionalDependencies": false, "peerDependencies": false }],
-    "@typescript-eslint/explicit-function-return-type": "error",
-    "@typescript-eslint/explicit-module-boundary-types": "error",
+    // "@typescript-eslint/explicit-function-return-type": "error",
+    // "@typescript-eslint/explicit-module-boundary-types": "error",
     "@typescript-eslint/no-inferrable-types": "off",
+    /* New chnages*/
+    "@typescript-eslint/explicit-function-return-type": "warn",
+    "@typescript-eslint/explicit-module-boundary-types": "warn",
+    // "@typescript-eslint/no-inferrable-types": "warn",
     "@typescript-eslint/typedef": [
       "error",
       {

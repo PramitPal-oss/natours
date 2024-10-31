@@ -1,16 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { SelectQueryBuilder } from 'typeorm';
 import Tours from '../../Entites/Tours';
-import AppdataSource from '../../database';
+import AppdataSource, { REPOS } from '../../database';
 import { createFieldsObj, createOrderObj, createWherObject } from '../../utils/toursutils';
 import AppError, { catchAsync } from '../../utils/appError';
 import { catchAsyncInterface } from '../../interface/ToursInterface';
 import { constructResponse } from '../../utils/helper';
 
 const getAllTours: catchAsyncInterface = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const ToursRepo: Repository<Tours> = AppdataSource.getRepository(Tours);
-
-  const tours: Tours[] = await ToursRepo.find({
+  const tours: Tours[] = await REPOS.TOURREPO.find({
     where: createWherObject(req),
     order: createOrderObj(req),
     select: createFieldsObj(req),
@@ -26,7 +24,7 @@ const getAllTours: catchAsyncInterface = catchAsync(async (req: Request, res: Re
 });
 
 const topFiveCheapTours: catchAsyncInterface = catchAsync(async (req: Request, res: Response): Promise<Response<any, Record<string, any>>> => {
-  const cheapTours: Tours[] = await AppdataSource.getRepository(Tours).find({
+  const cheapTours: Tours[] = await REPOS.TOURREPO.find({
     order: {
       price: 'ASC',
     },
@@ -64,7 +62,7 @@ const getToursByID: catchAsyncInterface = catchAsync(
 
     if (!id || Number.isNaN(+id)) next(new AppError(`Invalid ID`, 404));
 
-    const tours: Tours[] = await AppdataSource.getRepository(Tours).find({
+    const tours: Tours[] = await REPOS.TOURREPO.find({
       where: {
         id: +id,
       },
